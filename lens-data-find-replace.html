@@ -49,8 +49,12 @@ A Thelma component
         Exact Matches Only?
       </label>
 
-      <template if="{{matches}}">
+      <template if="{{matches > 1}}">
         <div class="progress">"{{find}}" has been replaced with "{{replaceWith}}" in {{matches}} places.</div>
+      </template>
+
+      <template if="{{matches === 1}}">
+        <div class="progress">"{{find}}" has been replaced with "{{replaceWith}}" in {{matches}} place.</div>
       </template>
     </div>
 
