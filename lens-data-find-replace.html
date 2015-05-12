@@ -25,10 +25,10 @@ A Thelma component
     <div class="lens-container">
 
       <label>Find:</label>
-      <input style="border: 2px solid #eee; padding: 3px; " is="core-input" committedValue="{{find}}" placeholder="" type="text">
+      <input style="border: 2px solid #eee; padding: 3px; " is="core-input" committedValue="{{find}}" value="{{find}}" type="text">
 
       <label>Replace With: </label>
-      <input style="border: 2px solid #eee; padding: 3px;" is="core-input" committedValue="{{replaceWith}}">
+      <input style="border: 2px solid #eee; padding: 3px;" is="core-input" committedValue="{{replaceWith}}" value="{{replaceWith}}">
 
       <label for="func_selector">Search in:</label>
       <core-selector id="search_in" selected="{{selectedColumns}}" valueattr="label" multi="true">
@@ -85,7 +85,8 @@ A Thelma component
       },
 
       ready: function () {
-
+        var self = this;
+        self.inputChanged();
       },
       toggleValue: function(e, detail, sender){
         this[sender.dataset.target] = Boolean(sender.dataset.value);
