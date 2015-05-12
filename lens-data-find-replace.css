@@ -16,4 +16,13 @@ core-selector .core-selected {
 label {
   display: block;
   color: #2fa3af;
+  margin-top: 5px;
+}
+
+.progress {
+  background-color: #eee;
+  border-radius: 3px;
+  padding: 3px;
+  font-weight: 600;
+  margin: 10px auto;
 }

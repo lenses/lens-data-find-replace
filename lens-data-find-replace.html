@@ -37,16 +37,20 @@ A Thelma component
         </template>
       </core-selector>
       
-      <label>Case Sensitive?</label>
-      <template if="{{!caseSensitive}}"> <core-icon icon="check-box-outline-blank" data-target="caseSensitive" data-value="1" on-click="{{toggleValue}}"></core-icon> </template>
-      <template if="{{caseSensitive}}"> <core-icon icon="check-box" data-target="caseSensitive" data-value="" on-click="{{toggleValue}}"></core-icon> </template>
-      
-      <label>Exact Matches Only?</label>
-      <template if="{{!exactMatchesOnly}}"> <core-icon icon="check-box-outline-blank" data-target="exactMatchesOnly" data-value="1" on-click="{{toggleValue}}"></core-icon> </template>
-      <template if="{{exactMatchesOnly}}"> <core-icon icon="check-box" data-target="exactMatchesOnly" data-value="" on-click="{{toggleValue}}"></core-icon> </template>
-      
+      <label>
+        <template if="{{!caseSensitive}}"> <core-icon icon="check-box-outline-blank" data-target="caseSensitive" data-value="1" on-click="{{toggleValue}}"></core-icon> </template>
+        <template if="{{caseSensitive}}"> <core-icon icon="check-box" data-target="caseSensitive" data-value="" on-click="{{toggleValue}}"></core-icon> </template>
+        Case Sensitive?
+      </label>
+
+      <label>
+        <template if="{{!exactMatchesOnly}}"> <core-icon icon="check-box-outline-blank" data-target="exactMatchesOnly" data-value="1" on-click="{{toggleValue}}"></core-icon> </template>
+        <template if="{{exactMatchesOnly}}"> <core-icon icon="check-box" data-target="exactMatchesOnly" data-value="" on-click="{{toggleValue}}"></core-icon> </template>
+        Exact Matches Only?
+      </label>
+
       <template if="{{matches}}">
-        <div>"{{find}}" has been replaced with "{{replaceWith}}" in {{matches}} places.</div>
+        <div class="progress">"{{find}}" has been replaced with "{{replaceWith}}" in {{matches}} places.</div>
       </template>
     </div>
 
