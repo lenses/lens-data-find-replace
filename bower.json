@@ -1,0 +1,14 @@
+{
+  "name": "lens-data-find-replace",
+  "version": "0.0.0",
+  "keywords": "thelma, polymer, web-components",
+  "main": "lens-data-find-replace.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#~0.5.5",
+    "core-component-page" : "Polymer/core-component-page#^0.5.5",
+    "th-theme": "thelmanews/th-theme#*"
+  },
+  "devDependencies": {
+    "web-component-tester": "Polymer/web-component-tester#^1.4.2"
+  }
+}
