@@ -1,0 +1,149 @@
+<link rel="import" href="../polymer/polymer.html"> 
+<link rel="import" href="../core-selector/core-selector.html">
+<link rel="import" href="../lens-u-data-utility/lens-u-data-utility.html">
+<link rel="import" href="../core-icons/core-icons.html">
+
+
+<!--
+A Thelma component
+
+##### Example
+
+    <lens-data-find-replace></lens-data-find-replace>
+
+@element lens-data-find-replace
+@blurb A Thelma component that transforms data
+@status alpha
+@author Nisha Batra
+@homepage http://lenses.github.io/lens-data-find-replace
+-->
+
+<polymer-element name="lens-data-find-replace"  attributes="input output find replaceWith exactMatchesOnly caseSensitive selectedColumns">
+  <template>
+    <link rel="stylesheet" href="lens-data-find-replace.css">
+    <lens-u-data-utility id="data_utility"></lens-u-data-utility>
+    <div class="lens-container">
+
+      <label>Find:</label>
+      <input style="border: 2px solid #eee; padding: 3px; " is="core-input" committedValue="{{find}}" value="{{find}}" type="text">
+
+      <label>Replace With: </label>
+      <input style="border: 2px solid #eee; padding: 3px;" is="core-input" committedValue="{{replaceWith}}" value="{{replaceWith}}">
+
+      <label for="func_selector">Search in:</label>
+      <core-selector id="search_in" selected="{{selectedColumns}}" valueattr="label" multi="true">
+        <template repeat="{{attr in _dataAttributes}}">
+          <div class="col" label="{{attr}}">{{attr}}</div>
+        </template>
+      </core-selector>
+      
+      <label>
+        <template if="{{!caseSensitive}}"> <core-icon icon="check-box-outline-blank" data-target="caseSensitive" data-value="1" on-click="{{toggleValue}}"></core-icon> </template>
+        <template if="{{caseSensitive}}"> <core-icon icon="check-box" data-target="caseSensitive" data-value="" on-click="{{toggleValue}}"></core-icon> </template>
+        Case Sensitive?
+      </label>
+
+      <label>
+        <template if="{{!exactMatchesOnly}}"> <core-icon icon="check-box-outline-blank" data-target="exactMatchesOnly" data-value="1" on-click="{{toggleValue}}"></core-icon> </template>
+        <template if="{{exactMatchesOnly}}"> <core-icon icon="check-box" data-target="exactMatchesOnly" data-value="" on-click="{{toggleValue}}"></core-icon> </template>
+        Exact Matches Only?
+      </label>
+
+      <template if="{{matches > 1}}">
+        <div class="progress">"{{find}}" has been replaced with "{{replaceWith}}" in {{matches}} places.</div>
+      </template>
+
+      <template if="{{matches === 1}}">
+        <div class="progress">"{{find}}" has been replaced with "{{replaceWith}}" in {{matches}} place.</div>
+      </template>
+    </div>
+
+  </template>
+
+  <script>
+    Polymer('lens-data-find-replace', {
+
+      /**
+       * Input data
+       *
+       * @property input
+       * @type Array
+       * @default [ ]
+       */
+      input: [],
+
+      /**
+       * Output data
+       *
+       * @property output
+       * @type Array
+       * @default [ ]
+       */
+      output: [],
+      caseSensitive: false,
+      exactMatchesOnly: false,
+      matches: 0,
+      // Observe changes on below attributes and trigger _calculateOutput() when changed
+      observe: {
+        selectedColumns: "_calculateOutput",
+        find: "_calculateOutput",
+        replaceWith: "_calculateOutput",
+        exactMatchesOnly: "_calculateOutput",
+        caseSensitive: "_calculateOutput"
+      },
+
+      ready: function () {
+        var self = this;
+        self.inputChanged();
+      },
+      toggleValue: function(e, detail, sender){
+        this[sender.dataset.target] = Boolean(sender.dataset.value);
+      },
+      inputChanged: function() {
+        var self = this;
+        var firstItem = self.input[0];
+        if(!firstItem) {
+          return;
+        }
+        var attributes = Object.keys(firstItem);
+        
+        if(JSON.stringify(self._dataAttributes) !== JSON.stringify(attributes) ) {
+          self._dataAttributes = attributes;
+        }
+
+        self._calculateOutput();
+
+      },
+      _calculateOutput: function() {         
+        var self = this;
+        self.matches = 0;
+        if (self.caseSensitive){
+          var pattern = self.exactMatchesOnly ? new RegExp("^"+self.find+"$") : new RegExp(self.find, "g");
+        } else {
+          var pattern = self.exactMatchesOnly ? new RegExp("^"+self.find+"$", "i") : new RegExp(self.find.toLowerCase(), "ig");
+        }
+
+        if (self.input && self.input.length && self.find && self.selectedColumns){
+          self.output = self.input.map(function(row, index){
+            var newRow = _.clone(row);
+
+            self.selectedColumns.forEach(function(col){
+              var value = row[col];
+              if (pattern.test(value)){
+                newRow[col] = value.replace(pattern, self.replaceWith);
+                self.matches++;
+              } 
+              
+
+            })
+            return newRow;
+          })     
+        }
+      },
+      outputChanged: function(){
+        this.fire('lens-output-changed', this);
+      }
+
+    });
+  </script>
+</polymer-element>
