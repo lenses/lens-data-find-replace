@@ -1,0 +1,33 @@
+{
+  "name": "lens-data-find-replace",
+  "version": "1.0.0",
+  "authors": [
+    "Anonymous <anonymous@example.com>"
+  ],
+  "description": "An element providing a solution to no problem in particular.",
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer",
+    "seed"
+  ],
+  "main": "lens-data-find-replace.html",
+  "license": "http://polymer.github.io/LICENSE.txt",
+  "homepage": "https://github.com/<USERNAME>/seed-element/",
+  "ignore": [
+    "/.*",
+    "/test/",
+    "/demo/"
+  ],
+  "dependencies": {
+    "iron-icons": "polymerelements/iron-icons#~1.0.3",
+    "iron-input": "polymerelements/iron-input#~1.0.4",
+    "iron-selector": "polymerelements/iron-selector#~1.0.2",
+    "lens-u-data-utility": "lenses/lens-u-data-utility#polymerOne",
+    "polymer": "Polymer/polymer#^1.0.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "web-component-tester": "*"
+  }
+}
