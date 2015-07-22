@@ -66,7 +66,7 @@ Example:
   </style>
 
   <template>
-    
+
     <label>Find:</label>
     <input style="border: 2px solid #eee; padding: 3px;" is="iron-input" bind-value="{{find}}" value="{{find}}" type="text">
 
@@ -74,8 +74,8 @@ Example:
     <input style="border: 2px solid #eee; padding: 3px;" is="iron-input" bind-value="{{replaceWith}}" value="{{replaceWith}}">
 
     <label>Search in:</label>
-    <iron-selector id="search_in" selected="{{selectedColumns}}" valueattr="label" multi="true">
-      <template repeat="{{attr in _dataAttributes}}">
+    <iron-selector id="search_in" selected-values="{{selectedLabels}}" attr-for-selected="label"  multi="true" on-iron-select="_calculateOutput" on-iron-deselect="_calculateOutput">
+      <template is="dom-repeat" items="{{_dataAttributes}}" as="attr">
         <div class="col" label="{{attr}}">{{attr}}</div>
       </template>
     </iron-selector>
@@ -99,20 +99,28 @@ Example:
       </template>
       Exact Matches Only?
     </label>
+
+    <template is="dom-if" if="{{_matches > 1}}">
+      <div class="progress">"{{find}}" has been replaced with "{{replaceWith}}" in {{_matches}} places.</div>
+    </template>
+
+    <template is="dom-if" if="{{_matches === 1}}">
+      <div class="progress">"<span>{{find}}</span>" has been replaced with "<span>{{replaceWith}}</span>" in <span>{{_matches}}</span> place.</div>
+    </template>
+
   </template>
 
 </dom-module>
 
+<script src="../lodash/lodash.js"></script>
+
 <script>
 
   Polymer({
-
     is: 'lens-data-find-replace',
-
     properties: {
-
       /**
-       * Input data
+       * Input data, where each item in the array is an object
        * @type Array
        * @default []
        */
@@ -123,7 +131,7 @@ Example:
       },
 
       /**
-       * Output data
+       * Output data, where each item in the array is an object
        * @type Array
        * @default []
        */
@@ -134,38 +142,71 @@ Example:
         readOnly: true,
         observer: '_outputChanged'
       },
+
+      /**
+       * The term to be searched in `input` data
+       * 
+       * @type String
+       * @default ''
+       */
+      find: {
+        type: String,
+        value: '',
+        observer: '_calculateOutput'
+      },
+
+      /**
+       * The term to replace matches for `find` in `input` data
+       * 
+       * @type String
+       * @default ''
+       */
+      replaceWith: {
+        type: String,
+        value: '',
+        observer: '_calculateOutput'
+      },
+
+      /**
+       * If true, the `find` term will be treated as case-sensitive
+       * @type Boolean
+       * @default true
+       */
       caseSensitive: {
         type: Boolean,
-        value: true
+        value: true,
+        observer: '_calculateOutput'
       },
+
+      /**
+       * If true, partial matches will not be replaced
+       * @type Boolean
+       * @default true
+       */
       exactMatchesOnly: {
         type: Boolean,
-        value: true
+        value: true,
+        observer: '_calculateOutput'
       },
+
       /**
-       * Describes the author of the element, but is really just an excuse to
-       * show off JSDoc annotations.
-       *
-       * @type {{name: string, image: string}}
+       * The domain for the search. These are columns / keys to searched within `input` data
+       * 
+       * @type Array
+       * @default []
        */
-      author: {
-        type: Object,
-        // Use `value` to provides a default value for a property, by setting it
-        // on your element's prototype.
-        //
-        // If you provide a function, as we do here, Polymer will call that
-        // _per element instance_.
-        //
-        // We do that to ensure that each element gets its own copy of the
-        // value, rather than having it shared across all instances (via the
-        // prototype).
-        value: function() {
-          return {
-            name:  'Dimitri Glazkov',
-            image: 'http://addyosmani.com/blog/wp-content/uploads/2013/04/unicorn.jpg',
-          };
-        }
+      selectedLabels: {
+        type: Array,
+        value: [],
+        notify: true      
       },
+
+      _matches: {
+        type: Number,
+        value: 0,
+        notify: true
+
+      }
 
     },
     listeners: {
@@ -173,7 +214,6 @@ Example:
     },
 
     // Element Lifecycle
-
     ready: function() {
       // `ready` is called after all elements have been configured, but
       // propagates bottom-up. This element's children are ready, but parents
@@ -202,45 +242,79 @@ Example:
     // Element Behavior
 
     /**
-     * The `lens-data-find-replace-lasers` event is fired whenever `fireLasers` is called.
-     *
-     * @event lens-data-find-replace-lasers
-     * @detail {{sound: String}}
+     * Toggles the boolean value of 'caseSensitive'
      */
-
-    /**
-     * Sometimes it's just nice to say hi.
-     *
-     * @param {string} greeting A positive greeting.
-     * @return {string} The full greeting.
-     */
-    sayHello: function(greeting) {
-      var response = greeting || 'Hello World!';
-      return 'lens-data-find-replace says, ' + response;
-    },
     toggleCaseSensitive: function(e, detail){
       this.caseSensitive = Boolean(e.target.dataset.value);
     },
 
+    /**
+     * Toggles the boolean value of 'exactMatchesOnly'
+     */
     toggleExactMatchesOnly: function(e, detail){
       this.exactMatchesOnly = Boolean(e.target.dataset.value);
     },
+
     /**
-     * Attempts to destroy this element's enemies with an any beam of light!
-     *
-     * Or, at least, dispatches an event in the vain hope that someone else will
-     * do the zapping.
+     * `output` is calculated by replaced all the matches in `input`
+     * 
+     * @return {[type]} [description]
      */
-    fireLasers: function() {
-      this.fire('lens-data-find-replace-lasers', {sound: 'Pew pew!'});
+    _calculateOutput: function(){
+      var self = this;
+        self._matches = 0;
+        if (self.caseSensitive){
+          var pattern = self.exactMatchesOnly ? new RegExp("^"+self.find+"$") : new RegExp(self.find, "g");
+        } else {
+          var pattern = self.exactMatchesOnly ? new RegExp("^"+self.find+"$", "i") : new RegExp(self.find.toLowerCase(), "ig");
+        }
+
+        if (self.input && self.input.length && self.find && self.selectedLabels && self.selectedLabels.length){
+
+          self.output = self.input.map(function(row, index){
+            var newRow = _.clone(row);
+            
+
+            self.selectedLabels.forEach(function(col){
+              var value = row[col];
+              if (pattern.test(value)){
+
+                newRow[col] = value.replace(pattern, self.replaceWith);
+                self._matches++;
+              } 
+              
+
+            })
+            return newRow;
+          })     
+        }
+
     },
 
     // Observers
     _inputChanged: function(newValue, oldValue){
+      var self = this;
+        var firstItem = self.input[0];
+        if(!firstItem) {
+          return;
+        }
+        var attributes = Object.keys(firstItem);
+        
+        if(JSON.stringify(self._dataAttributes) !== JSON.stringify(attributes) ) {
+          self._dataAttributes = attributes;
+        }
+
+        self._calculateOutput();
 
     },
-    _outputChanged: function(newValue, oldValue){
 
+    /**
+     * The `lens-output-changed` event is fired whenever `_outputChanged` is called.
+     * 
+     * @event lens-output-changed
+     */
+    _outputChanged: function(newValue, oldValue){
+      this.fire('lens-output-changed', this);
     }
 
   });
