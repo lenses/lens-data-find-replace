@@ -95,9 +95,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         preInput.textContent = JSON.stringify(input, undefined, 2);
         
         // Update output when it changes
-        document.addEventListener('lens-output-changed', function(val) {
-          console.log(elem.output);
-          preOutput.textContent = JSON.stringify(val.detail, undefined, 2);
+        document.addEventListener('lens-output-changed', function(e) {
+          preOutput.textContent = JSON.stringify(e.detail, undefined, 2);
         });
       };
 

@@ -100,13 +100,13 @@ Example:
       Exact Matches Only?
     </label>
 
-    <template is="dom-if" if="{{_matches > 1}}">
+    <template is="dom-if" if="{{_matches}}">
       <div class="progress">"{{find}}" has been replaced with "{{replaceWith}}" in {{_matches}} places.</div>
     </template>
-
-    <template is="dom-if" if="{{_matches === 1}}">
+<!-- 
+    <template is="dom-if" if="{{_matches}}">
       <div class="progress">"<span>{{find}}</span>" has been replaced with "<span>{{replaceWith}}</span>" in <span>{{_matches}}</span> place.</div>
-    </template>
+    </template> -->
 
   </template>
 
@@ -170,22 +170,22 @@ Example:
       /**
        * If true, the `find` term will be treated as case-sensitive
        * @type Boolean
-       * @default true
+       * @default false
        */
       caseSensitive: {
         type: Boolean,
-        value: true,
+        value: false,
         observer: '_calculateOutput'
       },
 
       /**
        * If true, partial matches will not be replaced
        * @type Boolean
-       * @default true
+       * @default false
        */
       exactMatchesOnly: {
         type: Boolean,
-        value: true,
+        value: false,
         observer: '_calculateOutput'
       },
 
@@ -201,19 +201,19 @@ Example:
         notify: true      
       },
 
+      /**
+       * The number of matches found in the data
+       * @type Number
+       * @default 0
+       */
       _matches: {
         type: Number,
         value: 0,
         notify: true
-
       }
-
-    },
-    listeners: {
-      
     },
 
-    // Element Lifecycle
+    // ELEMENT LIFECYCLE
     ready: function() {
       // `ready` is called after all elements have been configured, but
       // propagates bottom-up. This element's children are ready, but parents
@@ -239,7 +239,7 @@ Example:
       // Use this to clean up anything you did in `attached`.
     },
 
-    // Element Behavior
+    // ELEMENT BEHAVIOR
 
     /**
      * Toggles the boolean value of 'caseSensitive'
@@ -271,27 +271,25 @@ Example:
 
         if (self.input && self.input.length && self.find && self.selectedLabels && self.selectedLabels.length){
 
-          self.output = self.input.map(function(row, index){
+          var output = self.input.map(function(row, index){
             var newRow = _.clone(row);
             
-
             self.selectedLabels.forEach(function(col){
               var value = row[col];
               if (pattern.test(value)){
-
                 newRow[col] = value.replace(pattern, self.replaceWith);
                 self._matches++;
               } 
-              
-
             })
             return newRow;
-          })     
-        }
+          })  
 
+          // Since `output` is a read-only property, this is how to update the value
+          self._setOutput(output);
+        } 
     },
 
-    // Observers
+    // OBSERVERS
     _inputChanged: function(newValue, oldValue){
       var self = this;
         var firstItem = self.input[0];
@@ -303,18 +301,16 @@ Example:
         if(JSON.stringify(self._dataAttributes) !== JSON.stringify(attributes) ) {
           self._dataAttributes = attributes;
         }
-
         self._calculateOutput();
-
     },
 
     /**
-     * The `lens-output-changed` event is fired whenever `_outputChanged` is called.
+     * The `lens-output-changed` event is fired whenever changes are observed in `output` 
      * 
      * @event lens-output-changed
      */
     _outputChanged: function(newValue, oldValue){
-      this.fire('lens-output-changed', this);
+      this.fire('lens-output-changed', this.output);
     }
 
   });
