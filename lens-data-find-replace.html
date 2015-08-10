@@ -101,13 +101,10 @@ Example:
     </label>
 
     <template is="dom-if" if="{{_matches}}">
-      <div class="progress">"{{find}}" has been replaced with "{{replaceWith}}" in {{_matches}} places.</div>
+      <div class="progress">
+        "<span>{{find}}</span>" has been replaced with "<span>{{replaceWith}}</span>" in <span>{{_matches}}</span> <span>{{_checkIfPlural(_matches, 'place')}}</span>.
+      </div>
     </template>
-<!-- 
-    <template is="dom-if" if="{{_matches}}">
-      <div class="progress">"<span>{{find}}</span>" has been replaced with "<span>{{replaceWith}}</span>" in <span>{{_matches}}</span> place.</div>
-    </template> -->
-
   </template>
 
 </dom-module>
@@ -311,7 +308,12 @@ Example:
      */
     _outputChanged: function(newValue, oldValue){
       this.fire('lens-output-changed', this.output);
-    }
+    },
+
+    // FILTERS
+    _checkIfPlural: function(count, word){
+      return count > 1 ? word + 's' : word;
+    } 
 
   });
 
