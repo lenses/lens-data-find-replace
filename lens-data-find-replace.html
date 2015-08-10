@@ -29,13 +29,6 @@ Example:
       box-sizing: border-box;
     }
 
-    .author img {
-      float: left;
-      margin-right: 5px;
-      max-height: 100px;
-      max-width: 100px;
-    }
-
     iron-selector {
       min-height: 10px;
       display: inline-block;
@@ -47,10 +40,11 @@ Example:
       padding: 1px;
       border: 1px solid #EEE;
     }
+
     iron-selector .iron-selected {
       background-color: #ccc;
-
     }
+
     label {
       display: block;
       margin-top: 5px;
@@ -283,7 +277,9 @@ Example:
 
           // Since `output` is a read-only property, this is how to update the value
           self._setOutput(output);
-        } 
+        } else {
+          self.output = self.input;
+        }
     },
 
     // OBSERVERS
