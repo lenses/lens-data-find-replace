@@ -254,6 +254,7 @@ Example:
     _calculateOutput: function(){
       var self = this;
         self._matches = 0;
+
         if (self.caseSensitive){
           var pattern = self.exactMatchesOnly ? new RegExp("^"+self.find+"$") : new RegExp(self.find, "g");
         } else {
