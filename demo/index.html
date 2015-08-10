@@ -1,0 +1,108 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>lens-data-find-replace Demo</title>
+
+    <script src="../../webcomponentsjs/webcomponents.js"></script>
+    <link rel="import" href="../../polymer/polymer.html">
+    <link rel="import" href="../lens-data-find-replace.html">
+    <style>
+       body {
+        font-family: sans-serif;
+        font-size: 14px;
+      }
+      pre {
+        border: 1px solid #EEE;
+        font-size: 12px;
+        max-width: 300px;
+        max-height: 300px;
+        overflow: scroll;
+      }
+      #component {
+        border: 1px solid #BBB;
+        margin: 10px;
+        padding: 5px;
+        display: block;
+        width: 300px;
+      }
+      .component::before, .component::after {
+        content: '\2794';
+        position: absolute;
+        top: 50%;
+      }
+      .component::before {
+        right: -15px;
+      }
+      .component::after {
+        left: -15px;
+      }
+      section {
+        display: inline-block;
+        margin: 8px;
+        vertical-align: top;
+        position: relative;
+      }
+      html /deep/ input[is=core-input] {
+        border-bottom: 1px solid #E5E5E5 !important;
+      }
+    </style>
+  </head>
+  <body unresolved>
+
+    <p>An example of <code>&lt;lens-data-find-replace&gt;</code>:</p>
+
+    <section>
+      <label>Input:</label>
+      <pre id="input"></pre>
+    </section>
+    <section class="component">
+      <label>Component:</label>
+      <lens-data-find-replace id="component"></lens-data-find-replace>
+    </section>
+    <section>
+      <label>Output:</label>
+      <pre id="output"></pre>
+    </section>
+
+    <script>
+      // Sample input data
+      var input = new Object([
+        {"index":1, "text":"Texas","dollar":"$139,000","text_number":"125 1ST ST","percent":"12.2%","date":"2-12-2015","date_unformat":"2-12-2015","billion":"1.2B"},
+        {"index":2, "text":"Vermont","dollar":"$15,300","text_number":"$126,000 Reward","percent":"0.6%","date":"2-12-2010","date_unformat":"12/25/1995","billion":".2B"},
+        {"index":3, "text":"New York","dollar":"$205,800","text_number":"2nd Place","percent":"1.5%","date":"5-12-2015","date_unformat":"February 20, 2015","billion":"1.2B"},
+        {"index":4, "text":"New Mexico","dollar":"$1,180,700","text_number":"only text","percent":"1.5%","date":"12-12-2012","date_unformat":"Jan 20, 2015","billion":"0.5B"},
+        {"index":5, "text":"California","dollar":"$188,400","text_number":"$ value","percent":"-0.4%","date":"1-1-2015","date_unformat":"3-3-2015","billion":"11B"},
+        {"index":6, "text":"Alaska","dollar":"$145,900","text_number":"Q3 2012","percent":"3.3%","date":"10-30-1915","date_unformat":"4/4/2015","billion":"9B"}
+      ]);
+
+      // Display input/output and pass input to the component
+      window.onload = function() {
+        var elem = document.querySelector('#component');
+        var preInput = document.getElementById('input');
+        var preOutput = document.getElementById('output');
+        
+        // Set input for component
+        elem.input = input;
+        preInput.textContent = JSON.stringify(input, undefined, 2);
+        
+        // Update output when it changes
+        document.addEventListener('lens-output-changed', function(e) {
+          preOutput.textContent = JSON.stringify(e.detail, undefined, 2);
+        });
+      };
+
+    </script>
+
+  </body>
+</html>

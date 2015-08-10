@@ -1,17 +1,33 @@
 {
   "name": "lens-data-find-replace",
-  "version": "0.0.0",
-  "keywords": "thelma, polymer, web-components",
+  "version": "1.0.0",
+  "authors": [
+    "Anonymous <anonymous@example.com>"
+  ],
+  "description": "An element providing a solution to no problem in particular.",
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer",
+    "seed"
+  ],
   "main": "lens-data-find-replace.html",
+  "license": "http://polymer.github.io/LICENSE.txt",
+  "homepage": "https://github.com/<USERNAME>/seed-element/",
+  "ignore": [
+    "/.*",
+    "/test/",
+    "/demo/"
+  ],
   "dependencies": {
-    "polymer": "Polymer/polymer#~0.5.5",
-    "th-theme": "thelmanews/th-theme#*",
-    "core-component-page" : "Polymer/core-component-page#^0.5.5",
-    "lens-u-data-utility": "lenses/lens-u-data-utility",
-    "core-icon": "polymer/core-icon#~0.5.5",
-    "core-selector": "Polymer/core-selector#~0.5.5"
+    "iron-icons": "polymerelements/iron-icons#~1.0.3",
+    "iron-input": "polymerelements/iron-input#~1.0.4",
+    "iron-selector": "polymerelements/iron-selector#~1.0.2",
+    "lodash": "lodash/lodash#~3.7.0",
+    "polymer": "Polymer/polymer#^1.0.0"
   },
   "devDependencies": {
-    "web-component-tester": "Polymer/web-component-tester#^1.4.2"
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "web-component-tester": "*"
   }
 }

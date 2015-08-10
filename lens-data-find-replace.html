@@ -1,106 +1,291 @@
-<link rel="import" href="../polymer/polymer.html"> 
-<link rel="import" href="../core-selector/core-selector.html">
-<link rel="import" href="../lens-u-data-utility/lens-u-data-utility.html">
-<link rel="import" href="../core-icons/core-icons.html">
-
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-selector/iron-selector.html">
+<link rel="import" href="../iron-input/iron-input.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
 
 <!--
-A Thelma component
+An element providing a solution to no problem in particular.
 
-##### Example
+Example:
 
     <lens-data-find-replace></lens-data-find-replace>
 
-@element lens-data-find-replace
-@blurb A Thelma component that transforms data
-@status alpha
-@author Nisha Batra
-@homepage http://lenses.github.io/lens-data-find-replace
+@demo
 -->
+<dom-module id="lens-data-find-replace">
 
-<polymer-element name="lens-data-find-replace"  attributes="input output find replaceWith exactMatchesOnly caseSensitive selectedColumns">
+  <style>
+    :host {
+      display: block;
+      box-sizing: border-box;
+    }
+
+    iron-selector {
+      min-height: 10px;
+      display: inline-block;
+      max-height: 123px;
+      overflow-y: scroll; 
+    }
+
+    iron-selector .col {
+      padding: 1px;
+      border: 1px solid #EEE;
+    }
+
+    iron-selector .iron-selected {
+      background-color: #ccc;
+    }
+
+    label {
+      display: block;
+      margin-top: 5px;
+    }
+
+    .progress {
+      background-color: #eee;
+      border-radius: 3px;
+      padding: 3px;
+      font-weight: 600;
+      margin: 10px auto;
+    }
+  </style>
+
   <template>
-    <link rel="stylesheet" href="lens-data-find-replace.css">
-    <lens-u-data-utility id="data_utility"></lens-u-data-utility>
-    <div class="lens-container">
 
-      <label>Find:</label>
-      <input style="border: 2px solid #eee; padding: 3px; " is="core-input" committedValue="{{find}}" value="{{find}}" type="text">
+    <label>Find:</label>
+    <input style="border: 2px solid #eee; padding: 3px;" is="iron-input" bind-value="{{find}}" value="{{find}}" type="text">
 
-      <label>Replace With: </label>
-      <input style="border: 2px solid #eee; padding: 3px;" is="core-input" committedValue="{{replaceWith}}" value="{{replaceWith}}">
+    <label>Replace with:</label>
+    <input style="border: 2px solid #eee; padding: 3px;" is="iron-input" bind-value="{{replaceWith}}" value="{{replaceWith}}">
 
-      <label for="func_selector">Search in:</label>
-      <core-selector id="search_in" selected="{{selectedColumns}}" valueattr="label" multi="true">
-        <template repeat="{{attr in _dataAttributes}}">
-          <div class="col" label="{{attr}}">{{attr}}</div>
-        </template>
-      </core-selector>
-      
-      <label>
-        <template if="{{!caseSensitive}}"> <core-icon icon="check-box-outline-blank" data-target="caseSensitive" data-value="1" on-click="{{toggleValue}}"></core-icon> </template>
-        <template if="{{caseSensitive}}"> <core-icon icon="check-box" data-target="caseSensitive" data-value="" on-click="{{toggleValue}}"></core-icon> </template>
-        Case Sensitive?
-      </label>
-
-      <label>
-        <template if="{{!exactMatchesOnly}}"> <core-icon icon="check-box-outline-blank" data-target="exactMatchesOnly" data-value="1" on-click="{{toggleValue}}"></core-icon> </template>
-        <template if="{{exactMatchesOnly}}"> <core-icon icon="check-box" data-target="exactMatchesOnly" data-value="" on-click="{{toggleValue}}"></core-icon> </template>
-        Exact Matches Only?
-      </label>
-
-      <template if="{{matches > 1}}">
-        <div class="progress">"{{find}}" has been replaced with "{{replaceWith}}" in {{matches}} places.</div>
+    <label>Search in:</label>
+    <iron-selector id="search_in" selected-values="{{selectedLabels}}" attr-for-selected="label"  multi="true" on-iron-select="_calculateOutput" on-iron-deselect="_calculateOutput">
+      <template is="dom-repeat" items="{{_dataAttributes}}" as="attr">
+        <div class="col" label="{{attr}}">{{attr}}</div>
       </template>
+    </iron-selector>
 
-      <template if="{{matches === 1}}">
-        <div class="progress">"{{find}}" has been replaced with "{{replaceWith}}" in {{matches}} place.</div>
+    <label>
+      <template is="dom-if" if="{{!caseSensitive}}"> 
+        <iron-icon on-tap="toggleCaseSensitive" icon="check-box-outline-blank" data-target="caseSensitive" data-value="1"></iron-icon> 
       </template>
-    </div>
+      <template is="dom-if" if="{{caseSensitive}}"> 
+        <iron-icon on-tap="toggleCaseSensitive" icon="check-box" data-target="caseSensitive" data-value=""></iron-icon> 
+      </template>
+      Case Sensitive?
+    </label>
 
+    <label>
+      <template is="dom-if" if="{{!exactMatchesOnly}}"> 
+        <iron-icon on-tap="toggleExactMatchesOnly" icon="check-box-outline-blank" data-target="exactExactMatchesOnly" data-value="1"></iron-icon> 
+      </template>
+      <template is="dom-if" if="{{exactMatchesOnly}}"> 
+        <iron-icon on-tap="toggleExactMatchesOnly" icon="check-box" data-target="exactMatchesOnly" data-value=""></iron-icon> 
+      </template>
+      Exact Matches Only?
+    </label>
+
+    <template is="dom-if" if="{{_matches}}">
+      <div class="progress">
+        "<span>{{find}}</span>" has been replaced with "<span>{{replaceWith}}</span>" in <span>{{_matches}}</span> <span>{{_checkIfPlural(_matches, 'place')}}</span>.
+      </div>
+    </template>
   </template>
 
-  <script>
-    Polymer('lens-data-find-replace', {
+</dom-module>
+
+<script src="../lodash/lodash.js"></script>
+
+<script>
+
+  Polymer({
+    is: 'lens-data-find-replace',
+    properties: {
+      /**
+       * Input data, where each item in the array is an object
+       * @type Array
+       * @default []
+       */
+      input: {
+        type: Array,
+        value: [],
+        observer: '_inputChanged'
+      },
 
       /**
-       * Input data
-       *
-       * @property input
+       * Output data, where each item in the array is an object
        * @type Array
-       * @default [ ]
+       * @default []
        */
-      input: [],
+      output: {
+        type: Array,
+        value: [],
+        notify: true,
+        readOnly: true,
+        observer: '_outputChanged'
+      },
 
       /**
-       * Output data
-       *
-       * @property output
-       * @type Array
-       * @default [ ]
+       * The term to be searched in `input` data
+       * 
+       * @type String
+       * @default ''
        */
-      output: [],
-      caseSensitive: false,
-      exactMatchesOnly: false,
-      matches: 0,
-      // Observe changes on below attributes and trigger _calculateOutput() when changed
-      observe: {
-        selectedColumns: "_calculateOutput",
-        find: "_calculateOutput",
-        replaceWith: "_calculateOutput",
-        exactMatchesOnly: "_calculateOutput",
-        caseSensitive: "_calculateOutput"
+      find: {
+        type: String,
+        value: '',
+        observer: '_calculateOutput'
       },
 
-      ready: function () {
-        var self = this;
-        self.inputChanged();
+      /**
+       * The term to replace matches for `find` in `input` data
+       * 
+       * @type String
+       * @default ''
+       */
+      replaceWith: {
+        type: String,
+        value: '',
+        observer: '_calculateOutput'
       },
-      toggleValue: function(e, detail, sender){
-        this[sender.dataset.target] = Boolean(sender.dataset.value);
+
+      /**
+       * If true, the `find` term will be treated as case-sensitive
+       * @type Boolean
+       * @default false
+       */
+      caseSensitive: {
+        type: Boolean,
+        value: false,
+        observer: '_calculateOutput'
       },
-      inputChanged: function() {
-        var self = this;
+
+      /**
+       * If true, partial matches will not be replaced
+       * @type Boolean
+       * @default false
+       */
+      exactMatchesOnly: {
+        type: Boolean,
+        value: false,
+        observer: '_calculateOutput'
+      },
+
+      /**
+       * The domain for the search. These are columns / keys to searched within `input` data
+       * 
+       * @type Array
+       * @default []
+       */
+      selectedLabels: {
+        type: Array,
+        value: [],
+        notify: true      
+      },
+
+      /**
+       * The number of matches found in the data
+       * @type Number
+       * @default 0
+       */
+      _matches: {
+        type: Number,
+        value: 0,
+        notify: true
+      }
+    },
+
+    // ELEMENT LIFECYCLE
+    ready: function() {
+      // `ready` is called after all elements have been configured, but
+      // propagates bottom-up. This element's children are ready, but parents
+      // are not.
+      //
+      // This is the point where you should make modifications to the DOM (when
+      // necessary), or kick off any processes the element wants to perform.
+    },
+
+    attached: function() {
+      // `attached` fires once the element and its parents have been inserted
+      // into a document.
+      //
+      // This is a good place to perform any work related to your element's
+      // visual state or active behavior (measuring sizes, beginning animations,
+      // loading resources, etc).
+    },
+
+    detached: function() {
+      // The analog to `attached`, `detached` fires when the element has been
+      // removed from a document.
+      //
+      // Use this to clean up anything you did in `attached`.
+    },
+
+    // ELEMENT BEHAVIOR
+
+    /**
+     * Toggles the boolean value of 'caseSensitive'
+     */
+    toggleCaseSensitive: function(e, detail){
+      this.caseSensitive = Boolean(e.target.dataset.value);
+    },
+
+    /**
+     * Toggles the boolean value of 'exactMatchesOnly'
+     */
+    toggleExactMatchesOnly: function(e, detail){
+      this.exactMatchesOnly = Boolean(e.target.dataset.value);
+    },
+
+    /**
+     * `output` is calculated by replaced all the matches in `input`
+     * 
+     * @return {[type]} [description]
+     */
+    _calculateOutput: function(){
+      var self = this;
+        self._matches = 0;
+
+        if (self.caseSensitive){
+          var pattern = self.exactMatchesOnly ? new RegExp("^"+self.find+"$") : new RegExp(self.find, "g");
+        } else {
+          var pattern = self.exactMatchesOnly ? new RegExp("^"+self.find+"$", "i") : new RegExp(self.find.toLowerCase(), "ig");
+        }
+
+        if (self.input && self.input.length && self.find && self.selectedLabels && self.selectedLabels.length){
+
+          var output = self.input.map(function(row, index){
+            var newRow = _.clone(row);
+            
+            self.selectedLabels.forEach(function(col){
+              var value = row[col];
+              if (pattern.test(value)){
+                newRow[col] = value.replace(pattern, self.replaceWith);
+                self._matches++;
+              } 
+            })
+            return newRow;
+          })  
+
+          // Since `output` is a read-only property, this is how to update the value
+          self._setOutput(output);
+        } else {
+          self.output = self.input;
+        }
+    },
+
+    // OBSERVERS
+    _inputChanged: function(newValue, oldValue){
+      var self = this;
         var firstItem = self.input[0];
         if(!firstItem) {
           return;
@@ -110,40 +295,23 @@ A Thelma component
         if(JSON.stringify(self._dataAttributes) !== JSON.stringify(attributes) ) {
           self._dataAttributes = attributes;
         }
-
         self._calculateOutput();
+    },
 
-      },
-      _calculateOutput: function() {         
-        var self = this;
-        self.matches = 0;
-        if (self.caseSensitive){
-          var pattern = self.exactMatchesOnly ? new RegExp("^"+self.find+"$") : new RegExp(self.find, "g");
-        } else {
-          var pattern = self.exactMatchesOnly ? new RegExp("^"+self.find+"$", "i") : new RegExp(self.find.toLowerCase(), "ig");
-        }
+    /**
+     * The `lens-output-changed` event is fired whenever changes are observed in `output` 
+     * 
+     * @event lens-output-changed
+     */
+    _outputChanged: function(newValue, oldValue){
+      this.fire('lens-output-changed', this.output);
+    },
 
-        if (self.input && self.input.length && self.find && self.selectedColumns){
-          self.output = self.input.map(function(row, index){
-            var newRow = _.clone(row);
+    // FILTERS
+    _checkIfPlural: function(count, word){
+      return count > 1 ? word + 's' : word;
+    } 
 
-            self.selectedColumns.forEach(function(col){
-              var value = row[col];
-              if (pattern.test(value)){
-                newRow[col] = value.replace(pattern, self.replaceWith);
-                self.matches++;
-              } 
-              
+  });
 
-            })
-            return newRow;
-          })     
-        }
-      },
-      outputChanged: function(){
-        this.fire('lens-output-changed', this);
-      }
-
-    });
-  </script>
-</polymer-element>
+</script>
